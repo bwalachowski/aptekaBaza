@@ -1,18 +1,18 @@
 import pandas as pd
 
-colsToUse = [1, 2, 3, 4, 10, 12]
+colsToUse = [1, 2, 3, 4, 12, 14, 15]
 
 firstSheet = pd.read_excel("lekiRefundowane.xlsx", sheet_name= 0, skiprows = 2, usecols = colsToUse)
 restOfSheets = pd.read_excel("lekiRefundowane.xlsx", sheet_name= [1, 2], skiprows = 1, usecols = colsToUse)
 book = pd.concat(restOfSheets.values(), ignore_index=True)
 book = pd.concat([firstSheet, book], ignore_index=True)
-book.columns = ["substancja", "nazwaPostacDawka", "zawartosc", "EAN", "cena", "wskazania"]
+book.columns = ["substancja", "nazwaPostacDawka", "zawartosc", "EAN", "wskazania", "poziom", "doplata"]
 
 book[["nazwa", "postacDawka"]] = book.nazwaPostacDawka.str.split(pat = ", ", n = 1, expand = True)
 book = book.drop("nazwaPostacDawka", axis = 1)
 book[["postac", "dawka"]] = book.postacDawka.str.split(pat = r', \d', n = 1, expand = True)
 book = book.drop("postacDawka", axis = 1)
-book = book[["substancja", "nazwa", "postac", "dawka", "zawartosc", "EAN", "cena", "wskazania"]]
+book = book[["nazwa", "substancja", "postac", "dawka", "zawartosc", "EAN", "poziom", "wskazania", "doplata"]]
 
 book.sort_values(by = book.columns.values.tolist(), ignore_index = True, inplace = True)
 
@@ -34,7 +34,7 @@ f.write("\tPRIMARY KEY (Id)\n);\n\n")
 
 for i in range(len(book.index)):
     f.write("INSERT INTO Medicine(")
-    f.write("Substance, Name, Form, Dose, Content, EAN, Price, Scope) ")
+    f.write("Name, Substance, Form, Dose, Content, EAN, Refundation, Scope, Price) ")
     f.write("VALUES(")
     for j in range(len(book.columns)):
         if j > 0:
