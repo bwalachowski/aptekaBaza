@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 
 colsToUse = [1, 2, 3, 4, 12, 14, 15]
 
@@ -6,11 +7,13 @@ firstSheet = pd.read_excel("lekiRefundowane.xlsx", sheet_name= 0, skiprows = 2, 
 restOfSheets = pd.read_excel("lekiRefundowane.xlsx", sheet_name= [1, 2], skiprows = 1, usecols = colsToUse)
 book = pd.concat(restOfSheets.values(), ignore_index=True)
 book = pd.concat([firstSheet, book], ignore_index=True)
+
 book.columns = ["substancja", "nazwaPostacDawka", "zawartosc", "EAN", "wskazania", "poziom", "doplata"]
 
 book[["nazwa", "postacDawka"]] = book.nazwaPostacDawka.str.split(pat = ", ", n = 1, expand = True)
 book = book.drop("nazwaPostacDawka", axis = 1)
-book[["postac", "dawka"]] = book.postacDawka.str.split(pat = r', \d', n = 1, expand = True)
+
+book[["postac", "dawka"]] = book.postacDawka.str.split(pat = r', (?=\d)', n = 1, expand = True)
 book = book.drop("postacDawka", axis = 1)
 book = book[["nazwa", "substancja", "postac", "dawka", "zawartosc", "EAN", "poziom", "wskazania", "doplata"]]
 
@@ -46,7 +49,7 @@ for i in range(len(book.index)):
             f.write(str(book.iloc[i,j]))
         f.write("\"")
     f.write(");\n")
-f.close()
+f.close()   
 
 
 
